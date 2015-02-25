@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Dynamic;
 using System.Linq;
 using NLog;
 
@@ -13,19 +14,20 @@ namespace battleships
         private GameVisualizer vis;
         private ProcessMonitor monitor;
         private Ai ai;
-        private object[] headersArray;
+        private string exe;
 
-        public AiTester(Settings settings, MapGenerator gen, GameVisualizer vis, ProcessMonitor monitor, Ai ai, object[] headersArray)
+        public AiTester(Settings settings, MapGenerator gen, GameVisualizer vis, 
+            ProcessMonitor monitor, Ai ai, string exe)
         {
             this.settings = settings;
             this.gen = gen;
             this.vis = vis;
             this.monitor = monitor;
             this.ai = ai;
-            this.headersArray = headersArray;
+            this.exe = exe;
         }
 
-        public void TestSingleFile(string exe)
+        public void TestSingleFile()
         {
             var badShots = 0;
             var crashes = 0;
@@ -83,7 +85,7 @@ namespace battleships
             var crashPenalty = 100.0 * crashes / settings.CrashLimit;
             var efficiencyScore = 100.0 * (settings.Width * settings.Height - mean) / (settings.Width * settings.Height);
             var score = efficiencyScore - crashPenalty - badFraction;
-            var headers = FormatTableRow(headersArray);
+            var headers = FormatTableRow(new object[] { "AiName", "Mean", "Sigma", "Median", "Crashes", "Bad%", "Games", "Score" });
             var message = FormatTableRow(new object[] { ai.Name, mean, sigma, median, crashes, badFraction, gamesPlayed, score });
             resultsLog.Info(message);
             Console.WriteLine();

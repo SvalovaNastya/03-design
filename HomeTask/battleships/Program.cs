@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Threading;
+using Ninject;
 
 namespace battleships
 {
@@ -17,17 +18,24 @@ namespace battleships
                 return;
             }
             var aiPath = args[0];
-            var settings = new Settings("settings.txt");
-            var gen = new MapGenerator(settings, new Random(settings.RandomSeed));
-            var vis = new GameVisualizer();
-            var headersArray = new object[] { "AiName", "Mean", "Sigma", "Median", "Crashes", "Bad%", "Games", "Score" };
-            var monitor = new ProcessMonitor(TimeSpan.FromSeconds(settings.TimeLimitSeconds * settings.GamesCount), settings.MemoryLimit);
 
+            var container = new StandardKernel();
+            container.Bind<Settings>().To<Settings>().WithConstructorArgument("settings.txt");
+            var settings = container.Get<Settings>();
+            var rand = new Random(settings.RandomSeed);
+            container.Bind<MapGenerator>().To<MapGenerator>()
+                .WithConstructorArgument(rand);
+            container.Bind<GameVisualizer>().To<GameVisualizer>();
+            container.Bind<ProcessMonitor>().To<ProcessMonitor>()
+                .WithConstructorArgument(TimeSpan.FromSeconds(settings.TimeLimitSeconds*settings.GamesCount))
+                .WithConstructorArgument((long)settings.MemoryLimit);
+            container.Bind<Ai>().To<Ai>()
+                .WithConstructorArgument(aiPath);
+            container.Bind<AiTester>().To<AiTester>()
+                .WithConstructorArgument(aiPath);
             if (File.Exists(aiPath))
             {
-                var ai = new Ai(aiPath, monitor);
-                var tester = new AiTester(settings, gen, vis, monitor, ai, headersArray);
-                tester.TestSingleFile(aiPath);
+                container.Get<AiTester>().TestSingleFile();
             }
             else
                 Console.WriteLine("No AI exe-file " + aiPath);
