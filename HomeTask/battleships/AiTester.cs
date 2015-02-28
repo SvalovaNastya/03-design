@@ -15,9 +15,12 @@ namespace battleships
         private ProcessMonitor monitor;
         private Ai ai;
         private string exe;
+        private Func<Map, Ai, Game> gameCreator;
+        private Func<string, ProcessMonitor, Ai> aiCreator;
 
-        public AiTester(Settings settings, MapGenerator gen, GameVisualizer vis, 
-            ProcessMonitor monitor, Ai ai, string exe)
+        public AiTester(Settings settings, MapGenerator gen, GameVisualizer vis,
+            ProcessMonitor monitor, Ai ai, string exe, Func<Map, Ai, Game> gameCreator,
+            Func<string, ProcessMonitor, Ai> aiCreator)
         {
             this.settings = settings;
             this.gen = gen;
@@ -25,6 +28,8 @@ namespace battleships
             this.monitor = monitor;
             this.ai = ai;
             this.exe = exe;
+            this.gameCreator = gameCreator;
+            this.aiCreator = aiCreator;
         }
 
         public void TestSingleFile()
@@ -36,7 +41,7 @@ namespace battleships
             for (var gameIndex = 0; gameIndex < settings.GamesCount; gameIndex++)
             {
                 var map = gen.GenerateMap();
-                var game = new Game(map, ai);
+                var game = gameCreator(map, ai);
                 RunGameToEnd(game, vis);
                 gamesPlayed++;
                 badShots += game.BadShots;
@@ -44,7 +49,7 @@ namespace battleships
                 {
                     crashes++;
                     if (crashes > settings.CrashLimit) break;
-                    ai = new Ai(exe, monitor);
+                    ai = aiCreator(exe, monitor);
                 }
                 else
                     shots.Add(game.TurnsCount);

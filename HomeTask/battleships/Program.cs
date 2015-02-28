@@ -1,4 +1,5 @@
 ﻿using System;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
@@ -27,10 +28,12 @@ namespace battleships
                 .WithConstructorArgument(rand);
             container.Bind<GameVisualizer>().To<GameVisualizer>();
             container.Bind<ProcessMonitor>().To<ProcessMonitor>()
-                .WithConstructorArgument(TimeSpan.FromSeconds(settings.TimeLimitSeconds*settings.GamesCount))
+                .WithConstructorArgument(TimeSpan.FromSeconds(settings.TimeLimitSeconds * settings.GamesCount))
                 .WithConstructorArgument((long)settings.MemoryLimit);
             container.Bind<Ai>().To<Ai>()
                 .WithConstructorArgument(aiPath);
+            container.Bind<Func<Map, Ai, Game>>().ToMethod(ctx => (map, ai) => new Game(map, ai));
+            container.Bind<Func<string, ProcessMonitor, Ai>>().ToMethod(ctx => (exe, monitor) => new Ai(exe, monitor));
             container.Bind<AiTester>().To<AiTester>()
                 .WithConstructorArgument(aiPath);
             if (File.Exists(aiPath))
