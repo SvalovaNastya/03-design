@@ -15,6 +15,7 @@ namespace battleships
 			this.settings = settings;
 		}
 
+		//dep
 		public void TestSingleFile(string exe)
 		{
 			var gen = new MapGenerator(settings, new Random(settings.RandomSeed));
