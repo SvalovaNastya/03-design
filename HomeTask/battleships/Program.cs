@@ -34,11 +34,11 @@ namespace battleships
                 .WithConstructorArgument(aiPath);
             container.Bind<Func<Map, Ai, Game>>().ToMethod(ctx => (map, ai) => new Game(map, ai));
             container.Bind<Func<string, ProcessMonitor, Ai>>().ToMethod(ctx => (exe, monitor) => new Ai(exe, monitor));
-            container.Bind<AiTester>().To<AiTester>()
-                .WithConstructorArgument(aiPath);
+//            container.Bind<AiTester>().To<AiTester>()
+//                .WithConstructorArgument(aiPath);
             if (File.Exists(aiPath))
             {
-                container.Get<AiTester>().TestSingleFile();
+                container.Get<AiTester>().TestSingleFile(aiPath);
             }
             else
                 Console.WriteLine("No AI exe-file " + aiPath);
