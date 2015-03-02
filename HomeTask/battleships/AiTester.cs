@@ -38,7 +38,7 @@ namespace battleships
                 {
                     crashes++;
                     if (crashes > settings.CrashLimit) break;
-                    ai = new Ai(exe);
+                    ai.Dispose();
                     ai.registerProcess += monitor.Register;
                 }
                 else
