@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Threading;
+using NLog;
 
 namespace battleships
 {
@@ -19,6 +20,8 @@ namespace battleships
             var aiPath = args[0];
             var settings = new Settings("settings.txt");
             var tester = new AiTester(settings);
+            Logger resultsLog = LogManager.GetLogger("results");
+            tester.writeLogInfo += resultsLog.Info;
             if (File.Exists(aiPath))
                 tester.TestSingleFile(aiPath);
             else
