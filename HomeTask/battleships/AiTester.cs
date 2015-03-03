@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Globalization;
 using System.Linq;
 using NLog;
 
@@ -16,19 +18,17 @@ namespace battleships
         }
 
         //dep
-        public void TestSingleFile(Ai ai, List<Game> gamesArray)
+        public void TestSingleFile(Ai ai, List<Game> gamesArray, Action<Game> visualize, Action<Process> reg)
         {
-            var vis = new GameVisualizer();
-            var monitor = new ProcessMonitor(TimeSpan.FromSeconds(settings.TimeLimitSeconds * settings.GamesCount), settings.MemoryLimit);
             var badShots = 0;
             var crashes = 0;
             var gamesPlayed = 0;
             var shots = new List<int>();
-            ai.registerProcess += monitor.Register;
+            ai.registerProcess += reg;
             for (var gameIndex = 0; gameIndex < gamesArray.Count; gameIndex++)
             {
                 var game = gamesArray[gameIndex];
-                RunGameToEnd(game, vis);
+                RunGameToEnd(game, visualize);
                 gamesPlayed++;
                 badShots += game.BadShots;
                 if (game.AiCrashed)
@@ -36,7 +36,7 @@ namespace battleships
                     crashes++;
                     if (crashes > settings.CrashLimit) break;
                     ai.Dispose();
-                    ai.registerProcess += monitor.Register;
+                    ai.registerProcess += reg;
                 }
                 else
                     shots.Add(game.TurnsCount);
@@ -53,14 +53,14 @@ namespace battleships
             writeLogInfo(message);
         }
 
-        private void RunGameToEnd(Game game, GameVisualizer vis)
+        private void RunGameToEnd(Game game, Action<Game> visualize)
         {
             while (!game.IsOver())
             {
                 game.MakeStep();
                 if (settings.Interactive)
                 {
-                    vis.Visualize(game);
+                    visualize(game);
                     if (game.AiCrashed)
                         Console.WriteLine(game.LastError.Message);
                     Console.ReadKey();

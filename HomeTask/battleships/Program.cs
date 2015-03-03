@@ -28,13 +28,15 @@ namespace battleships
                 var gen = new MapGenerator(settings, new Random(settings.RandomSeed));
                 var gamesArray = new List<Game>();
                 var ai = new Ai(aiPath);
+                var vis = new GameVisualizer();
+                var monitor = new ProcessMonitor(TimeSpan.FromSeconds(settings.TimeLimitSeconds * settings.GamesCount), settings.MemoryLimit);
                 for (var gameIndex = 0; gameIndex < settings.GamesCount; gameIndex++)
                 {
                     var map = gen.GenerateMap();
                     var game = new Game(map, ai);
                     gamesArray.Add(game);
                 }
-                tester.TestSingleFile(ai, gamesArray);
+                tester.TestSingleFile(ai, gamesArray, vis.Visualize, monitor.Register);
             }
             else
                 Console.WriteLine("No AI exe-file " + aiPath);
