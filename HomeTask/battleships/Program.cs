@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
@@ -23,7 +24,18 @@ namespace battleships
             Logger resultsLog = LogManager.GetLogger("results");
             tester.writeLogInfo += resultsLog.Info;
             if (File.Exists(aiPath))
-                tester.TestSingleFile(aiPath);
+            {
+                var gen = new MapGenerator(settings, new Random(settings.RandomSeed));
+                var gamesArray = new List<Game>();
+                var ai = new Ai(aiPath);
+                for (var gameIndex = 0; gameIndex < settings.GamesCount; gameIndex++)
+                {
+                    var map = gen.GenerateMap();
+                    var game = new Game(map, ai);
+                    gamesArray.Add(game);
+                }
+                tester.TestSingleFile(ai, gamesArray);
+            }
             else
                 Console.WriteLine("No AI exe-file " + aiPath);
         }
