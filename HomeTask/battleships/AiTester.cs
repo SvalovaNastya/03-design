@@ -9,7 +9,6 @@ namespace battleships
 {
     public class AiTester
     {
-        public event Action<string> writeLogInfo;
         private readonly Settings settings;
 
         public AiTester(Settings settings)
@@ -17,40 +16,27 @@ namespace battleships
             this.settings = settings;
         }
 
-        //dep
-        public void TestSingleFile(Ai ai, List<Game> gamesArray, Action<Game> visualize, Action<Process> reg)
+        public Statistic RunOneGame(Game game, Action<Game> visualize, int gameIndex, Statistic stat)
         {
-            var badShots = 0;
-            var crashes = 0;
-            var gamesPlayed = 0;
-            var shots = new List<int>();
-            ai.registerProcess += reg;
-            for (var gameIndex = 0; gameIndex < gamesArray.Count; gameIndex++)
+            RunGameToEnd(game, visualize);
+            var newShots = new List<int>(stat.shots);
+            var crashes = stat.crashes;
+            if (game.AiCrashed)
             {
-                var game = gamesArray[gameIndex];
-                RunGameToEnd(game, visualize);
-                gamesPlayed++;
-                badShots += game.BadShots;
-                if (game.AiCrashed)
-                {
-                    crashes++;
-                    if (crashes > settings.CrashLimit) break;
-                    ai.Dispose();
-                    ai.registerProcess += reg;
-                }
-                else
-                    shots.Add(game.TurnsCount);
-                if (settings.Verbose)
-                {
-                    Console.WriteLine(
-                        "Game #{3,4}: Turns {0,4}, BadShots {1}{2}",
-                        game.TurnsCount, game.BadShots, game.AiCrashed ? ", Crashed" : "", gameIndex);
-                }
+                crashes++;
+                if (crashes > settings.CrashLimit)
+                    return new Statistic(stat.badShots + game.BadShots, stat.shots, crashes, stat.gamesPlayed + 1);
+//                ai.Dispose();
             }
-            ai.Dispose();
-            var stat = new Statistic();
-            var message = stat.WriteTotal(ai, settings, shots, crashes, badShots, gamesPlayed);
-            writeLogInfo(message);
+            else
+                newShots.Add(game.TurnsCount);
+            if (settings.Verbose)
+            {
+                Console.WriteLine(
+                    "Game #{3,4}: Turns {0,4}, BadShots {1}{2}",
+                    game.TurnsCount, game.BadShots, game.AiCrashed ? ", Crashed" : "", gameIndex);
+            }
+            return new Statistic(stat.badShots + game.BadShots, newShots, crashes, stat.gamesPlayed + 1);
         }
 
         private void RunGameToEnd(Game game, Action<Game> visualize)

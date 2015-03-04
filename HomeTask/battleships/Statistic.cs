@@ -6,8 +6,20 @@ using System.Threading.Tasks;
 
 namespace battleships
 {
-    class Statistic
+    public class Statistic
     {
+        public readonly int badShots;
+        public readonly List<int> shots;
+        public readonly int crashes;
+        public readonly int gamesPlayed;
+
+        public Statistic(int badShots, List<int> shots, int crashes, int gamesPlayed)
+        {
+            this.badShots = badShots;
+            this.shots = shots;
+            this.crashes = crashes;
+            this.gamesPlayed = gamesPlayed;
+        }
 
         private string FormatTableRow(object[] values)
         {
@@ -15,7 +27,7 @@ namespace battleships
                 + string.Join(" ", values.Skip(1).Select(v => FormatValue(v, 7)));
         }
 
-        private static string FormatValue(object v, int width)
+        private string FormatValue(object v, int width)
         {
             return v.ToString().Replace("\t", " ").PadRight(width).Substring(0, width);
         }
