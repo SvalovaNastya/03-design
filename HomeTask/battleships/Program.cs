@@ -10,7 +10,6 @@ namespace battleships
 {
     public class Program
     {
-//        public static event Action<string> writeLogInfo;
 
         private static void Main(string[] args)
         {
@@ -37,15 +36,28 @@ namespace battleships
             var gen = new MapGenerator(settings, new Random(settings.RandomSeed));
             var ai = new Ai(aiPath);
             var vis = new GameVisualizer();
-            var stat = new Statistic(0, new List<int>(), 0, 0);
+            var stat = new Statistic();
             var monitor = new ProcessMonitor(TimeSpan.FromSeconds(settings.TimeLimitSeconds * settings.GamesCount), settings.MemoryLimit);
             ai.registerProcess += monitor.Register;
+            var cVis = new ConsVisualiser();
 
             for (var gameIndex = 0; gameIndex < settings.GamesCount; gameIndex++)
             {
                 var map = gen.GenerateMap();
                 var game = new Game(map, ai);
-                stat = tester.RunOneGame(game, vis.Visualize, gameIndex, stat);
+                var gameResult = tester.GameRunner(game, vis.Visualize, stat.crashes);
+                stat.crashes = gameResult.crashes;
+                stat.badShots += gameResult.badShots;
+                if (gameResult.shots != 0)
+                {
+                    stat.shots.Add(gameResult.shots);
+
+                    if (settings.Verbose)
+                    {
+                        cVis.WriteGameStat(game, gameIndex);
+                    }
+                }
+                stat.gamesPlayed++;
             }
 
             ai.Dispose();

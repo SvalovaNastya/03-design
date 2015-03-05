@@ -8,17 +8,17 @@ namespace battleships
 {
     public class Statistic
     {
-        public readonly int badShots;
-        public readonly List<int> shots;
-        public readonly int crashes;
-        public readonly int gamesPlayed;
+        public int badShots;
+        public List<int> shots;
+        public int crashes;
+        public int gamesPlayed;
 
-        public Statistic(int badShots, List<int> shots, int crashes, int gamesPlayed)
+        public Statistic()
         {
-            this.badShots = badShots;
-            this.shots = shots;
-            this.crashes = crashes;
-            this.gamesPlayed = gamesPlayed;
+            this.badShots = 0;
+            this.shots = new List<int>();
+            this.crashes = 0;
+            this.gamesPlayed = 0;
         }
 
         private string FormatTableRow(object[] values)

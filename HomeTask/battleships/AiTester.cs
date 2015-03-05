@@ -16,37 +16,30 @@ namespace battleships
             this.settings = settings;
         }
 
-        public Statistic RunOneGame(Game game, Action<Game> visualize, int gameIndex, Statistic stat)
+        public GameResult GameRunner(Game game, Action<Game> actionOnEveryStep, int crashes)
         {
-            RunGameToEnd(game, visualize);
-            var newShots = new List<int>(stat.shots);
-            var crashes = stat.crashes;
+            RunGameToEnd(game, actionOnEveryStep);
+            var shot = 0;
             if (game.AiCrashed)
             {
                 crashes++;
                 if (crashes > settings.CrashLimit)
-                    return new Statistic(stat.badShots + game.BadShots, stat.shots, crashes, stat.gamesPlayed + 1);
+                    return new GameResult(game.BadShots, 0, crashes);
 //                ai.Dispose();
             }
             else
-                newShots.Add(game.TurnsCount);
-            if (settings.Verbose)
-            {
-                Console.WriteLine(
-                    "Game #{3,4}: Turns {0,4}, BadShots {1}{2}",
-                    game.TurnsCount, game.BadShots, game.AiCrashed ? ", Crashed" : "", gameIndex);
-            }
-            return new Statistic(stat.badShots + game.BadShots, newShots, crashes, stat.gamesPlayed + 1);
+                shot = game.TurnsCount;
+            return new GameResult(game.BadShots, shot, crashes);
         }
 
-        private void RunGameToEnd(Game game, Action<Game> visualize)
+        private void RunGameToEnd(Game game, Action<Game> actionOnEveryStep)
         {
             while (!game.IsOver())
             {
                 game.MakeStep();
                 if (settings.Interactive)
                 {
-                    visualize(game);
+                    actionOnEveryStep(game);
                     if (game.AiCrashed)
                         Console.WriteLine(game.LastError.Message);
                     Console.ReadKey();
