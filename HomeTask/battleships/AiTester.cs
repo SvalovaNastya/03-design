@@ -7,24 +7,26 @@ using NLog;
 
 namespace battleships
 {
-    public class AiTester
+    public class GameRunner
     {
         private readonly Settings settings;
 
-        public AiTester(Settings settings)
+        public GameRunner(Settings settings)
         {
             this.settings = settings;
         }
 
-        public GameResult GameRunner(Game game, Action<Game> actionOnEveryStep, int crashes)
+        public GameResult GameRun(Game game, Action<Game> actionOnEveryStep)
         {
             RunGameToEnd(game, actionOnEveryStep);
             var shot = 0;
+            var crashes = 0;
             if (game.AiCrashed)
             {
                 crashes++;
-                if (crashes > settings.CrashLimit)
-                    return new GameResult(game.BadShots, 0, crashes);
+//                if (crashes > settings.CrashLimit)
+//                    return new GameResult(game.BadShots, 0, crashes);
+//                AiPool a = new AiPool();
 //                ai.Dispose();
             }
             else

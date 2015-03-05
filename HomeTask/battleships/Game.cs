@@ -55,6 +55,7 @@ namespace battleships
 				LastTarget = LastTarget == null
 					? ai.Init(Map.Width, Map.Height, Map.Ships.Select(s => s.Size).ToArray())
 					: ai.GetNextShot(LastShotInfo.Target, LastShotInfo.Hit);
+//                throw new Exception("dd");
 				return true;
 			}
 			catch (Exception e)
@@ -63,7 +64,7 @@ namespace battleships
 				log.Info("Ai {0} crashed", ai.Name);
 				log.Error(e);
 				LastError = e;
-                ai.Dispose();
+//                ai.Dispose();
 				return false;
 			}
 		}
